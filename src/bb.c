@@ -1,6 +1,8 @@
 /*
  *
  * Compiler for the Bare Bones programming language written in C
+ * 
+ * TJ Liggett
  *
  */
 
@@ -8,24 +10,35 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+ * Variables are stored in an array (bones). They are retrieved from the 
+ * array utilizing the search function.
+ */
 struct var
 {
-	char key[10];
-	int value;
+	char key[10];	/* variable key: used to find in array */
+	int value;	/* variable value: all vars in barebones are ints */
 };
 
+/*
+ * Instructions are read from a .bb file and stored as the instr structure.
+ */
 struct instr
 {
-    char function[10];
-    char variable[10];
-    int loopindex;
+    char function[10]; 	/* the function/command of the instruction */
+    char variable[10]; 	/* the impacted variable */
+    int loopindex;     	/* For loop instructions, an instruction's loop
+    			   is stored in the loops array */
 };
 
+/*
+ * All loops are built and stored in the loops array
+ */
 struct loop
 {
-    char boolean[10];
-    struct instr list[50];
-    int length;
+    char boolean[10];	/* The variable to be checked on each iteration */
+    struct instr list[50];	/* The instructions to be executed */
+    int length;			/* The length of the loop */
 };
 
 
@@ -34,38 +47,53 @@ int main(int argc, char *argv[])
 {
 	FILE *fptr;
 	
-	struct var bones[200];
-	struct loop loops[200];
-	int listlength = 0; // length of variable list
-	int looplength = 0; // length of loops list
-	// Prints bare bones file name
+	struct var bones[200];	/* All variables are stored here */
+	struct loop loops[200]; /* All loops are stored here */
+	int listlength = 0; /* length of variable list (bones) */
+	int looplength = 0; /* length of loops list */
+	
+	/* Prints bare bones file name */
 	printf("Bare Bones file: %s\n", argv[1]);
 
-	// attempt to read file argument	
+	/* attempt to read file argument */	
 	if ((fptr = fopen(argv[1], "r")) == NULL)
 	{
+       		/* Program exits if the file pointer returns NULL. */
        		printf("Error! opening file\n");
-       		// Program exits if the file pointer returns NULL.
-       		exit(1);
+		exit(1);
    	}
 
-	char line[ 256 ];	
+	/* Read through each line of file, parse instruction, execute */
+	char line[ 256 ];	/* File lines are read here */	
 	while(fgets(line, sizeof line, fptr) != NULL)
 	{
-		struct instr command; 
-		parseLine(line, &command);
+		struct instr command;	   /* The line's instruction */
+		
+
+		/* Filters comments, not executed by interpreter */
+		if(strstr(line, "#") != NULL)
+		{
+			continue;
+		}
+		
+		parseLine(line, &command); 
+		
+		/* Loops are built (recursively) before executed */
 		if(strstr(command.function, "while") != NULL)
 		{
 			buildLoop(&command, &listlength, bones, fptr, loops, &looplength);
 			//printf("BUILT LOOP %d\n", command.loopindex);
 		}
 
+		/* All instructions (including loops) are executed here */
         	execute(command, &listlength, bones, fptr, loops, &looplength);
+		
 	}	
 	
+	/* Just a little flair to the interpreter. Barebones is hard, but everything is greek to me. */
 	printf("||barebones φινίρισμα||\n");	
+
 	fclose(fptr); // Close file when program is finished
-	
 	exit(0);
 }
 
@@ -74,25 +102,26 @@ int execute(struct instr command, int *listlength, struct var bones[], FILE *fpt
 {
 	//printf("%d	%d", listlength, *listlength);
 	int length = *listlength;
-	if(strstr(command.function, "while") != NULL)
+	if(strstr(command.function, "while") != NULL)		/* Executes loop instruction here */
 	{
 	        //printf("Can I get anything?\n");
 		executeLoop(command, listlength, bones, fptr, loops, looplength);	
 	}
-	else if(strstr(command.function, "incr") != NULL)
+	else if(strstr(command.function, "incr") != NULL) 	/* Increment instruction */
 	{
 		incr(command.variable, length, bones);
 	}
-	else if(strstr(command.function, "decr") != NULL)
+	else if(strstr(command.function, "decr") != NULL)	/* Decrement instruction */
 	{
 		decr(command.variable, length, bones);
 	}
-	else if(strstr(command.function, "clear") != NULL)
+	else if(strstr(command.function, "clear") != NULL)	/* Clear instruction */
 	{
 		clear(command.variable,	listlength, bones);
 	}
-	else if(strstr(command.function, "print") != NULL)
+	else if(strstr(command.function, "print") != NULL)	/* Print instruction */
 	{
+		/* NOTE: Print is foreign to */
 		int index = search(command.variable, length, bones);
 		printf("%s ==> %d\n", command.variable, bones[index].value);
 	}
@@ -127,7 +156,11 @@ int buildLoop(struct instr *command, int *listlength, struct var bones[], FILE *
 	char line[256];
 	while(fgets(line, sizeof line, fptr) != NULL && strstr(line, ";") == NULL)
 	{
-		struct instr ins; 
+		struct instr ins;
+	       	if(strstr(line, "#") != NULL)
+		{
+			continue;
+		}	
 		//printf("line: %s\n", line);
 		parseLine(line, &ins);
 		//printf("loopvar: %s\n", buildloop.boolean);
