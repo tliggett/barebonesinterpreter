@@ -53,3 +53,4 @@ while x
       ;
 ```
 The loop will interpret all statements before the break line `;` as a part of the loop.
+For Bare Bones code examples, view the scripts folder.
