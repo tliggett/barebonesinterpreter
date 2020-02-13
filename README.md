@@ -7,6 +7,7 @@ You must have make and gcc installed on your machine.
 ### Install make/gcc
 #### OSX (Mac)
 `brew install make`
+
 `brew install gcc`
 #### Linux
 ##### ubuntu/debian
@@ -16,6 +17,7 @@ You must have make and gcc installed on your machine.
 
 ### Install barebones
 `make barebones`
+
 `sudo make install`
 
 
