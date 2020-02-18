@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+
 /*
  * Variables are stored in an array (bones). They are retrieved from the 
  * array utilizing the search function.
@@ -40,6 +42,20 @@ struct loop
     struct instr list[50];	/* The instructions to be executed */
     int length;			/* The length of the loop */
 };
+
+
+int parseLine(char line[256], struct instr *command);
+int search(char key[], int listlength, struct var bones[]);
+
+int execute(struct instr command, int *listlength, struct var bones[], FILE *fptr, struct loop loops[], int *looplength);
+
+int buildLoop(struct instr *command, int *listlength, struct var bones[], FILE *fptr, struct loop loops[], int *looplength);
+int executeLoop(struct instr command, int *listlength, struct var bones[], FILE *fptr, struct loop loops[], int *looplength);
+
+int clear(char key[], int *listlength, struct var bones[]);
+int incr(char key[], int listlength, struct var bones[]);
+int decr(char key[], int listlength, struct var bones[]);
+
 
 
 

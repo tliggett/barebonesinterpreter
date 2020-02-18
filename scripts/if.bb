@@ -4,6 +4,7 @@ clear s1
 clear s2
 clear aux
 clear X
+incr X
 clear Y
 # Shows x before if executed
 print X

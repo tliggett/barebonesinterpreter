@@ -1,5 +1,4 @@
 clear X
-incr X
 clear Y
 print X
 incr Y
