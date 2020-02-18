@@ -10,7 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+#define MAXLINE 256		/* Maximum length of a line */
+#define MAXVARNAME 10		/* Maximum length of a variable name */
 
 /*
  * Variables are stored in an array (bones). They are retrieved from the 
@@ -18,8 +19,8 @@
  */
 struct var
 {
-	char key[10];	/* variable key: used to find in array */
-	int value;	/* variable value: all vars in barebones are ints */
+	char key[MAXVARNAME];	/* variable key: used to find in array */
+	int value;		/* variable value: all vars in barebones are ints */
 };
 
 /*
@@ -27,10 +28,10 @@ struct var
  */
 struct instr
 {
-    char function[10]; 	/* the function/command of the instruction */
-    char variable[10]; 	/* the impacted variable */
-    int loopindex;     	/* For loop instructions, an instruction's loop
-    			   is stored in the loops array */
+    char function[MAXVARNAME]; 	/* the function/command of the instruction */
+    char variable[MAXVARNAME]; 	/* the impacted variable */
+    int loopindex;     		/* For loop instructions, an instruction's loop
+    			   	   is stored in the loops array */
 };
 
 /*
@@ -38,13 +39,13 @@ struct instr
  */
 struct loop
 {
-    char boolean[10];	/* The variable to be checked on each iteration */
+    char boolean[MAXVARNAME];	/* The variable to be checked on each iteration */
     struct instr list[50];	/* The instructions to be executed */
     int length;			/* The length of the loop */
 };
 
 
-int parseLine(char line[256], struct instr *command);
+int parseLine(char line[MAXLINE], struct instr *command);
 int search(char key[], int listlength, struct var bones[]);
 
 int execute(struct instr command, int *listlength, struct var bones[], FILE *fptr, struct loop loops[], int *looplength);
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
    	}
 
 	/* Read through each line of file, parse instruction, execute */
-	char line[ 256 ];	/* File lines are read here */	
+	char line[ MAXLINE ];	/* File lines are read here */	
 	while(fgets(line, sizeof line, fptr) != NULL)
 	{
 		struct instr command;	   /* The line's instruction */
@@ -155,7 +156,7 @@ int buildLoop(struct instr *command, int *listlength, struct var bones[], FILE *
 	/* Do while loop stuff */
 			
 	/* Set up the loop structure */
-	char boolean[10];
+	char boolean[MAXVARNAME];
 	struct loop buildloop;
 	struct instr comm;
 	comm = *command;
@@ -169,7 +170,7 @@ int buildLoop(struct instr *command, int *listlength, struct var bones[], FILE *
 	strcpy(buildloop.boolean, boolean);
 	buildloop.length = 0;
 	/* Pull loop instructions until loop is done or EOF */
-	char line[256];
+	char line[ MAXLINE ];
 	while(fgets(line, sizeof line, fptr) != NULL && strstr(line, ";") == NULL)
 	{
 		struct instr ins;
@@ -196,11 +197,11 @@ int buildLoop(struct instr *command, int *listlength, struct var bones[], FILE *
 	return 0;
 }
 
-int parseLine(char line[256], struct instr *command)
+int parseLine(char line[MAXLINE], struct instr *command)
 {
 	struct instr ins;
-	char function[10];
-	char variable[10];
+	char function[ MAXVARNAME ];
+	char variable[ MAXVARNAME ];
 	char * lineptr = strtok(line, " ");
 	strcpy(function, lineptr);
 	lineptr = strtok(NULL, " ");
@@ -239,7 +240,7 @@ int executeLoop(struct instr command, int *listlength, struct var bones[], FILE 
 			/* For debugging
 			struct instr loopcommand; 
 			strcpy(loopcommand.function, whileloop.list[i].function);
-			char variable[10];
+			char variable[ MAXVARNAME ];
 			strcpy(loopcommand.variable, whileloop.list[i].variable);
 			printf("func: %s, variable: %s\n", loopcommand.function, loopcommand.variable);
 			*/
